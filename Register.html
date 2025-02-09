@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="flex items-center justify-center min-h-screen bg-gray-100">
+    
+    <div class="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-md">
+        <h2 class="text-2xl font-bold text-center text-gray-900">Register</h2>
+        
+        <form id="registerForm" class="space-y-4">
+            <!-- First Name Field -->
+            <div class="relative">
+                <input id="regFirstName" type="text" placeholder="Enter your first name"
+                    class="w-full px-4 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <p id="firstNameError" class="text-red-500 text-sm mt-1 hidden"></p>
+            </div>
+
+            <!-- Last Name Field -->
+            <div class="relative">
+                <input id="regLastName" type="text" placeholder="Enter your last name"
+                    class="w-full px-4 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <p id="lastNameError" class="text-red-500 text-sm mt-1 hidden"></p>
+            </div>
+
+            <!-- Email Field -->
+            <div class="relative">
+                <input id="regEmail"  placeholder="Enter your email"
+                    class="w-full px-4 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <p id="emailError" class="text-red-500 text-sm mt-1 hidden"></p>
+            </div>
+
+            <!-- Password Field -->
+            <div class="relative">
+                <input id="regPassword" type="password" placeholder="Enter your password"
+                    class="w-full px-4 py-2 pr-10 border border-gray-300 rounded-md bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <button type="button" onclick="togglePassword('regPassword')" class="absolute inset-y-0 right-3 flex items-center text-gray-500">👁️</button>
+                <p id="passwordError" class="text-red-500 text-sm mt-1 hidden"></p>
+            </div>
+
+            <!-- Confirm Password Field -->
+            <div class="relative">
+                <input id="regConfirmPassword" type="password" placeholder="Re-enter your password"
+                    class="w-full px-4 py-2 pr-10 border border-gray-300 rounded-md bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <button type="button" onclick="togglePassword('regConfirmPassword')" class="absolute inset-y-0 right-3 flex items-center text-gray-500">👁️</button>
+                <p id="confirmPasswordError" class="text-red-500 text-sm mt-1 hidden"></p>
+            </div>
+
+            <!-- Register Button -->
+            <button type="submit"
+                class="w-full py-2 mt-4 text-white bg-blue-500 rounded-md hover:bg-blue-600 focus:outline-none">
+                Register
+            </button>
+        </form>
+
+        <!-- Login Link -->
+        <p class="text-center text-gray-500">Already have an account? 
+            <a href="login.html" class="text-blue-500">Login</a>
+        </p>
+    </div>
+
+    <script>
+        function togglePassword(fieldId) {
+            let field = document.getElementById(fieldId);
+            field.type = field.type === "password" ? "text" : "password";
+        }
+
+        document.getElementById("registerForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+
+            // Get input values
+            let firstName = document.getElementById("regFirstName").value.trim();
+            let lastName = document.getElementById("regLastName").value.trim();
+            let email = document.getElementById("regEmail").value.trim();
+            let password = document.getElementById("regPassword").value.trim();
+            let confirmPassword = document.getElementById("regConfirmPassword").value.trim();
+
+            let isValid = true;
+
+            // Validate First Name
+            if (firstName === "") {
+                showError("firstNameError", "First name is required.");
+                isValid = false;
+            } else {
+                hideError("firstNameError");
+            }
+
+            // Validate Last Name
+            if (lastName === "") {
+                showError("lastNameError", "Last name is required.");
+                isValid = false;
+            } else {
+                hideError("lastNameError");
+            }
+
+            // Validate Email
+            if (email === "") {
+                showError("emailError", "Email is required.");
+                isValid = false;
+            } else if (!validateEmail(email)) {
+                showError("emailError", "Invalid email format.");
+                isValid = false;
+            } else {
+                hideError("emailError");
+            }
+
+            // Validate Password Complexity
+            if (!validatePassword(password)) {
+                showError("passwordError", "Password must be at least 8 characters, include 1 uppercase letter, 1 lowercase letter, 1 number, and 1 special character.");
+                isValid = false;
+            } else {
+                hideError("passwordError");
+            }
+
+            // Validate Confirm Password
+            if (confirmPassword !== password) {
+                showError("confirmPasswordError", "Passwords do not match.");
+                isValid = false;
+            } else {
+                hideError("confirmPasswordError");
+            }
+
+            // If all fields are valid, save user data
+            if (isValid) {
+                const userData = {
+                    firstName: firstName,
+                    lastName: lastName,
+                    email: email
+                };
+
+                localStorage.setItem("loggedInUser", JSON.stringify(userData));
+                alert("Registration successful!");
+                window.location.href = "profile.html"; // Redirect to profile page
+            }
+        });
+
+        function showError(elementId, message) {
+            let errorElement = document.getElementById(elementId);
+            errorElement.innerText = message;
+            errorElement.classList.remove("hidden");
+        }
+
+        function hideError(elementId) {
+            let errorElement = document.getElementById(elementId);
+            errorElement.innerText = "";
+            errorElement.classList.add("hidden");
+        }
+
+        function validateEmail(email) {
+            return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+        }
+
+        function validatePassword(password) {
+            return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$/.test(password);
+        }
+    </script>
+</body>
+</html>

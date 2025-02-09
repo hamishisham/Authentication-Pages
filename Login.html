@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="flex items-center justify-center min-h-screen bg-gray-100">
+    
+    <div class="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-md">
+        <h2 class="text-2xl font-bold text-center text-gray-900">Log In</h2>
+        
+        <form id="loginForm" class="space-y-4">
+            <!-- Email Field -->
+            <div class="relative">
+                <input id="email"  placeholder="Enter your email"
+                    class="w-full px-4 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <p id="emailError" class="text-red-500 text-sm mt-1 hidden"></p>
+            </div>
+
+            <!-- Password Field -->
+            <div class="relative">
+                <input id="password" type="password" placeholder="Enter your password"
+                    class="w-full px-4 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <span id="togglePassword" class="absolute inset-y-0 right-3 flex items-center cursor-pointer">👁️</span>
+                <p id="passwordError" class="text-red-500 text-sm mt-1 hidden"></p>
+            </div>
+
+            <!-- Login Button -->
+            <button type="submit"
+                class="w-full py-2 mt-4 text-white bg-blue-500 rounded-md hover:bg-blue-600 focus:outline-none">
+                Login
+            </button>
+        </form>
+
+        <!-- Sign-up Link -->
+        <p class="text-center text-gray-500">Don't have an account? 
+            <a href="register.html" class="text-blue-500">Register</a>
+        </p>
+    </div>
+
+    <script>
+        document.getElementById("loginForm").addEventListener("submit", function (event) {
+            event.preventDefault();
+
+            let email = document.getElementById("email").value.trim();
+            let password = document.getElementById("password").value.trim();
+            let emailError = document.getElementById("emailError");
+            let passwordError = document.getElementById("passwordError");
+            let emailInput = document.getElementById("email");
+            let passwordInput = document.getElementById("password");
+
+            // Reset previous errors
+            emailError.classList.add("hidden");
+            passwordError.classList.add("hidden");
+            emailInput.classList.remove("border-red-500");
+            passwordInput.classList.remove("border-red-500");
+
+            let hasError = false;
+
+            if (!email) {
+                emailError.innerText = "Email is required!";
+                emailError.classList.remove("hidden");
+                emailInput.classList.add("border-red-500");
+                hasError = true;
+            }
+
+            if (!password) {
+                passwordError.innerText = "Password is required!";
+                passwordError.classList.remove("hidden");
+                passwordInput.classList.add("border-red-500");
+                hasError = true;
+            }
+
+            if (hasError) return;
+
+            let users = JSON.parse(localStorage.getItem("users")) || [];
+            let validUser = users.find(user => user.email === email && user.password === password);
+
+            if (validUser) {
+                localStorage.setItem("loggedInUser", JSON.stringify(validUser));
+                window.location.href = "ProfilePage.html";  // Redirect to profile page
+            } else {
+                emailError.innerText = "Invalid email or password!";
+                emailError.classList.remove("hidden");
+                emailInput.classList.add("border-red-500");
+                passwordInput.classList.add("border-red-500");
+            }
+        });
+
+        // Toggle password visibility
+        document.getElementById("togglePassword").addEventListener("click", function () {
+            let passwordInput = document.getElementById("password");
+            passwordInput.type = passwordInput.type === "password" ? "text" : "password";
+        });
+
+        // Remove error message and reset border color when typing
+        document.getElementById("email").addEventListener("input", function () {
+            document.getElementById("emailError").classList.add("hidden");
+            this.classList.remove("border-red-500");
+        });
+        document.getElementById("password").addEventListener("input", function () {
+            document.getElementById("passwordError").classList.add("hidden");
+            this.classList.remove("border-red-500");
+        });
+    </script>
+
+</body>
+</html>
