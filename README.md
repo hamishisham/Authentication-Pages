@@ -1,5 +1,3 @@
-# Authentication-Pages
-
 # Authentication Pages
 
 A simple authentication system with login, register, and profile management. Users can upload avatars and update their profile data.
