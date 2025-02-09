@@ -11,8 +11,9 @@
         <h2 class="text-2xl font-semibold mb-2 text-gray-800">Profile</h2>
 
         <!-- Profile Avatar -->
-        <div class="flex justify-center mb-4">
-            <img id="avatar" src="profile.webp" alt="Profile Avatar" class="w-24 h-24 rounded-full border-2 border-gray-300">
+        <div class="flex flex-col items-center mb-4">
+            <img id="avatar" src="profile.webp" alt="Profile Avatar" class="w-24 h-24 rounded-full border-2 border-gray-300 mb-2">
+            <input type="file" id="avatarUpload" class="text-sm text-gray-600" accept="image/*">
         </div>
 
         <!-- Welcome Message -->
@@ -21,17 +22,20 @@
         <!-- Editable User Info -->
         <div class="text-left">
             <label class="text-sm text-gray-600">First Name</label>
-            <input id="firstName" type="text" class="w-full p-2 border border-gray-300 rounded-lg mb-2 focus:outline-none focus:ring-2 focus:ring-blue-400">
+            <input id="firstName" type="text" class="w-full p-2 border border-gray-300 rounded-lg mb-2 focus:ring-2 focus:ring-blue-400">
             
             <label class="text-sm text-gray-600">Last Name</label>
-            <input id="lastName" type="text" class="w-full p-2 border border-gray-300 rounded-lg mb-2 focus:outline-none focus:ring-2 focus:ring-blue-400">
+            <input id="lastName" type="text" class="w-full p-2 border border-gray-300 rounded-lg mb-2 focus:ring-2 focus:ring-blue-400">
 
             <label class="text-sm text-gray-600">Email</label>
-            <input id="email" type="email" class="w-full p-2 border border-gray-300 rounded-lg mb-2 focus:outline-none focus:ring-2 focus:ring-blue-400">
+            <input id="email" type="email" class="w-full p-2 border border-gray-300 rounded-lg mb-2 focus:ring-2 focus:ring-blue-400" disabled>
 
             <label class="text-sm text-gray-600">Phone Number</label>
-            <input id="phone" type="tel" class="w-full p-2 border border-gray-300 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-400">
+            <input id="phone" type="tel" class="w-full p-2 border border-gray-300 rounded-lg mb-4 focus:ring-2 focus:ring-blue-400">
         </div>
+
+        <!-- Success Message -->
+        <p id="successMessage" class="text-green-500 text-sm mb-2 hidden">Profile updated successfully!</p>
 
         <!-- Buttons -->
         <button onclick="saveProfile()" class="w-full p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-700 transition duration-300 mb-2">
@@ -54,41 +58,65 @@
             }
 
             try {
-                const loggedInUser = JSON.parse(loggedInUserString);
-                
-                // Populate the input fields with user data
-                document.getElementById("firstName").value = loggedInUser.firstName;
-                document.getElementById("lastName").value = loggedInUser.lastName;
+                const loggedInUser = JSON.parse(loggedInUserString) || {};
+                document.getElementById("firstName").value = loggedInUser.firstName || "";
+                document.getElementById("lastName").value = loggedInUser.lastName || "";
                 document.getElementById("email").value = loggedInUser.email || "";
                 document.getElementById("phone").value = loggedInUser.phone || "";
+                document.getElementById("welcomeMessage").innerText = `Welcome, ${loggedInUser.firstName || "User"}!`;
 
-                // Update the welcome message
-                document.getElementById("welcomeMessage").innerText = `Welcome, ${loggedInUser.firstName} ${loggedInUser.lastName}!`;
-            
+                // Load avatar
+                const savedAvatar = localStorage.getItem(`avatar_${loggedInUser.email}`);
+                if (savedAvatar) {
+                    document.getElementById("avatar").src = savedAvatar;
+                }
             } catch (error) {
                 console.error("Error parsing user data:", error);
             }
         }
 
         function saveProfile() {
+            const loggedInUser = JSON.parse(localStorage.getItem("loggedInUser")) || {};
+            const users = JSON.parse(localStorage.getItem("users")) || [];
+
             const updatedUser = {
                 firstName: document.getElementById("firstName").value,
                 lastName: document.getElementById("lastName").value,
-                email: document.getElementById("email").value,
-                phone: document.getElementById("phone").value
+                email: loggedInUser.email,  // Prevent changing email
+                phone: document.getElementById("phone").value,
+                password: loggedInUser.password  // Keep original password
             };
 
-            // Save updated user info in localStorage
+            // Update the user in the users array
+            const updatedUsers = users.map(user =>
+                user.email === loggedInUser.email ? updatedUser : user
+            );
+
+            localStorage.setItem("users", JSON.stringify(updatedUsers));
             localStorage.setItem("loggedInUser", JSON.stringify(updatedUser));
-            
-            // Reload the page to reflect changes
-            location.reload();
+
+            document.getElementById("successMessage").classList.remove("hidden");
+            setTimeout(() => document.getElementById("successMessage").classList.add("hidden"), 2000);
         }
 
         function logout() {
             localStorage.removeItem("loggedInUser");
             window.location.href = "login.html";
         }
+
+        document.getElementById("avatarUpload").addEventListener("change", function (event) {
+            const file = event.target.files[0];
+
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    document.getElementById("avatar").src = e.target.result;
+                    const loggedInUser = JSON.parse(localStorage.getItem("loggedInUser")) || {};
+                    localStorage.setItem(`avatar_${loggedInUser.email}`, e.target.result);
+                };
+                reader.readAsDataURL(file);
+            }
+        });
 
         document.addEventListener("DOMContentLoaded", loadProfile);
     </script>
